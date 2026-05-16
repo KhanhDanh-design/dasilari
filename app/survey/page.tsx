@@ -1,8 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import { AnimatePresence, cubicBezier, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -134,7 +134,7 @@ const pageMotion = {
   initial: { opacity: 0, x: 28 },
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -28 },
-  transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+  transition: { duration: 0.35, ease: cubicBezier(0.22, 1, 0.36, 1) },
 };
 
 export default function SurveyPage() {
@@ -189,10 +189,7 @@ export default function SurveyPage() {
 
   const currentStep = localizedSteps[stepIndex];
   const isLastStep = stepIndex === localizedSteps.length - 1;
-  const canContinue = useMemo(
-    () => Boolean(formState[currentStep.field]),
-    [currentStep.field, formState],
-  );
+  const canContinue = Boolean(formState[currentStep.field]);
 
   const handleSelect = (field: keyof SurveyState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
@@ -222,7 +219,7 @@ export default function SurveyPage() {
 
   return (
     <section className="mx-auto w-full max-w-6xl">
-      <div className="organic-shadow rounded-3xl border border-border/70 bg-[radial-gradient(circle_at_top,_rgba(246,230,179,0.45),_transparent_60%),linear-gradient(135deg,#fffefb_0%,#f7f2e8_45%,#eef8f2_100%)] p-6 sm:p-8">
+      <div className="organic-shadow rounded-3xl border border-border/70 bg-[radial-gradient(circle_at_top,rgba(246,230,179,0.45),transparent_60%),linear-gradient(135deg,#fffefb_0%,#f7f2e8_45%,#eef8f2_100%)] p-6 sm:p-8">
         <span className="inline-flex items-center gap-2 rounded-full bg-emerald-600/10 px-4 py-1 text-sm font-semibold text-emerald-700">
           <CheckCircle2 className="h-4 w-4" />
           {t.survey.badge}
@@ -242,7 +239,7 @@ export default function SurveyPage() {
         </div>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[2rem] border border-border/70 bg-surface p-4 shadow-lg shadow-emerald-900/5 sm:p-6">
+          <div className="rounded-4xl border border-border/70 bg-surface p-4 shadow-lg shadow-emerald-900/5 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
@@ -260,7 +257,7 @@ export default function SurveyPage() {
               {currentStep.subtitle}
             </p>
 
-            <div className="mt-6 min-h-[430px]">
+            <div className="mt-6 min-h-107.5">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentStep.title}
@@ -281,7 +278,7 @@ export default function SurveyPage() {
                           onClick={() =>
                             handleSelect(currentStep.field, option.id)
                           }
-                          className={`group flex min-h-[150px] flex-col justify-between rounded-[1.75rem] border p-5 text-left transition-all duration-300 hover:scale-[1.02] ${
+                          className={`group flex min-h-37.5 flex-col justify-between rounded-[1.75rem] border p-5 text-left transition-all duration-300 hover:scale-[1.02] ${
                             isActive
                               ? "border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-900/10"
                               : "border-border/80 bg-[#fffefb] hover:border-emerald-300"
@@ -349,7 +346,7 @@ export default function SurveyPage() {
             </div>
           </div>
 
-          <aside className="rounded-[2rem] border border-border/70 bg-surface p-6 shadow-lg shadow-emerald-900/5">
+          <aside className="rounded-4xl border border-border/70 bg-surface p-6 shadow-lg shadow-emerald-900/5">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
               {t.survey.selectedProfileTitle}
             </p>
