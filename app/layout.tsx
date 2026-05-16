@@ -36,7 +36,10 @@ export default function RootLayout({
       <body className="min-h-full bg-background text-foreground">
         <LanguageProvider>
           <div className="relative flex min-h-screen flex-col overflow-x-clip">
-            <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] bg-[radial-gradient(70%_60%_at_10%_0%,rgba(188,224,205,0.5),transparent),radial-gradient(40%_45%_at_85%_15%,rgba(244,228,179,0.45),transparent)]" />
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 -z-10 bg-[radial-gradient(70%_60%_at_10%_0%,rgba(188,224,205,0.5),transparent),radial-gradient(40%_45%_at_85%_15%,rgba(244,228,179,0.45),transparent)]"
+              style={{ height: "420px" }}
+            />
             <Navbar />
             <main className="flex-1 px-4 pb-10 pt-24 sm:px-8 lg:px-12">
               {children}

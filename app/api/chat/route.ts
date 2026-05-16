@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { streamText } from "ai";
 
 const VI_SYSTEM_PROMPT = `Bạn tên là DasiLari, một chuyên gia du lịch bản địa tại Đà Lạt. Nhiệm vụ DUY NHẤT của bạn là tư vấn du lịch, ẩm thực, thời tiết và lịch trình tại Đà Lạt.
 QUY TẮC BẮT BUỘC:
@@ -16,6 +16,46 @@ Reply briefly and clearly, with a maximum of 150-200 words, friendly tone, and n
 const getSystemPrompt = (language: string) =>
   language === "en" ? EN_SYSTEM_PROMPT : VI_SYSTEM_PROMPT;
 
+type UiMessagePart = {
+  type: string;
+  text?: string;
+};
+
+type UiMessage = {
+  role: "user" | "assistant" | "system";
+  content?: string;
+  parts?: UiMessagePart[];
+};
+
+const toModelMessages = (messages: UiMessage[]) => {
+  return messages
+    .map((message) => {
+      if (message.parts && message.parts.length > 0) {
+        const text = message.parts
+          .filter(
+            (part) => part.type === "text" && typeof part.text === "string",
+          )
+          .map((part) => part.text ?? "")
+          .join("\n")
+          .trim();
+
+        if (text) {
+          return { role: message.role, content: text };
+        }
+      }
+
+      if (typeof message.content === "string" && message.content.trim()) {
+        return { role: message.role, content: message.content.trim() };
+      }
+
+      return null;
+    })
+    .filter(
+      (message): message is { role: UiMessage["role"]; content: string } =>
+        Boolean(message),
+    );
+};
+
 export async function POST(req: Request) {
   try {
     const apiKey = process.env.AI_ROUTER_API_KEY;
@@ -27,7 +67,7 @@ export async function POST(req: Request) {
     const language =
       req.headers.get("x-dasilari-language") === "en" ? "en" : "vi";
     const body = (await req.json().catch(() => null)) as {
-      messages?: UIMessage[];
+      messages?: UiMessage[];
     } | null;
     const messages = body?.messages ?? [];
 
@@ -39,7 +79,7 @@ export async function POST(req: Request) {
     const result = streamText({
       model: openai(process.env.AI_ROUTER_MODEL ?? "gpt-4o"),
       system: getSystemPrompt(language),
-      messages: await convertToModelMessages(messages),
+      messages: toModelMessages(messages),
       maxOutputTokens: 220,
       temperature: 0.4,
     });

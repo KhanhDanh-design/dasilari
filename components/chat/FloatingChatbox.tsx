@@ -72,7 +72,7 @@ const FloatingChatbox = () => {
     [language],
   );
 
-  const { messages, sendMessage, status, setMessages } = useChat({
+  const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
       headers: {

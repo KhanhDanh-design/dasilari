@@ -13,6 +13,11 @@ export function Navbar() {
   const { language, toggleLanguage } = useLanguage();
   const t = getTranslation(language);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +28,10 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 px-4 py-4 sm:px-8 lg:px-12">
