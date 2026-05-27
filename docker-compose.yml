@@ -1,0 +1,19 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Khai báo tên biến ở đây, Docker sẽ tự động lấy giá trị từ file .env.local truyền vào Dockerfile lúc build
+        - NEXT_PUBLIC_SUPABASE_URL
+        - NEXT_PUBLIC_SUPABASE_ANON_KEY
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SUPABASE_URL=https://oxecyynrybmhlpnllmbr.supabase.co
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94ZWN5eW5yeWJtaGxwbmxsbWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA4MjYsImV4cCI6MjA5NDU4NjgyNn0.LAK6Qnum7sDcmuX-rrZPxvsb--Ey9raZLnVTs7E5SW0
+      - AI_ROUTER_API_KEY=${AI_ROUTER_API_KEY}

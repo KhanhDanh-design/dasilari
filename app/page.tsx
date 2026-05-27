@@ -13,9 +13,10 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Attraction } from "@/constants/attractions";
-import { getAttractions } from "@/constants/attractions";
 import { useLanguage } from "@/components/providers/language-provider";
 import { getTranslation } from "@/constants/translations";
+
+import { createClient } from "@/utils/supabase/client";
 
 const MapComponent = dynamic(() => import("@/components/map/MapComponent"), {
   ssr: false,
@@ -34,28 +35,25 @@ const aboutIcons = [Compass, MessageCircleMore, MapPinned] as const;
 export default function Home() {
   const { language } = useLanguage();
   const t = getTranslation(language);
+  const supabase = createClient();
 
   const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [selectedAttraction, setSelectedAttraction] =
     useState<Attraction | null>(null);
 
   useEffect(() => {
-    let mounted = true;
-
     async function loadAttractions() {
-      const data = await getAttractions();
-      if (!mounted) return;
+      const { data } = await supabase
+        .from("attractions")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      setAttractions(data);
-      setSelectedAttraction(data[0] ?? null);
+      setAttractions(data ?? []);
+      setSelectedAttraction(data?.[0] ?? null);
     }
 
     void loadAttractions();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  }, [supabase]);
 
   const featuredLabel = useMemo(() => {
     if (!selectedAttraction) {
@@ -113,7 +111,7 @@ export default function Home() {
         <div className="mt-3 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="overflow-hidden rounded-3xl border border-emerald-900/10">
             <img
-              src="https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1400&q=80"
+              src="https://vietnam-tourist.com.vn/wp-content/uploads/2023/03/da-lat.jpg"
               alt={t.home.aboutImageAlt}
               className="h-full min-h-[260px] w-full object-cover"
             />
@@ -201,7 +199,7 @@ export default function Home() {
                   >
                     <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl">
                       <img
-                        src={attraction.image}
+                        src={attraction.image_url}
                         alt={attraction.name}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />

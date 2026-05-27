@@ -31,6 +31,16 @@ const markerIcon = new L.DivIcon({
   popupAnchor: [0, -40],
 });
 
+const normalizeCoords = (lat: number, lng: number): [number, number] => {
+  if (Math.abs(lat) > 90 && Math.abs(lng) <= 90) {
+    return [lng, lat];
+  }
+  if (Math.abs(lng) > 180 && Math.abs(lat) <= 180) {
+    return [lng, lat];
+  }
+  return [lat, lng];
+};
+
 function FlyToSelected({
   selectedAttraction,
 }: {
@@ -40,14 +50,14 @@ function FlyToSelected({
 
   useEffect(() => {
     if (!selectedAttraction) return;
-    map.flyTo(
-      [selectedAttraction.lat, selectedAttraction.lng],
-      Math.max(map.getZoom(), 14),
-      {
-        duration: 1.2,
-        animate: true,
-      },
+    const [lat, lng] = normalizeCoords(
+      selectedAttraction.latitude,
+      selectedAttraction.longitude,
     );
+    map.flyTo([lat, lng], Math.max(map.getZoom(), 14), {
+      duration: 1.2,
+      animate: true,
+    });
   }, [map, selectedAttraction]);
 
   return null;
@@ -90,46 +100,52 @@ export default function MapComponent({
           />
           <FlyToSelected selectedAttraction={selectedAttraction} />
 
-          {attractions.map((attraction) => (
-            <Marker
-              key={attraction.id}
-              position={[attraction.lat, attraction.lng]}
-              icon={markerIcon}
-              eventHandlers={{
-                click: () => onSelectAttraction(attraction),
-              }}
-            >
-              <Popup className="dasi-popup" closeButton={false} autoPan>
-                <div className="w-64 space-y-3 rounded-2xl bg-[#FDFBF7] p-1 text-emerald-900">
-                  <div className="overflow-hidden rounded-2xl">
-                    <img
-                      src={attraction.image}
-                      alt={attraction.name}
-                      className="h-32 w-full object-cover"
-                    />
+          {attractions.map((attraction) => {
+            const [lat, lng] = normalizeCoords(
+              attraction.latitude,
+              attraction.longitude,
+            );
+            return (
+              <Marker
+                key={attraction.id}
+                position={[lat, lng]}
+                icon={markerIcon}
+                eventHandlers={{
+                  click: () => onSelectAttraction(attraction),
+                }}
+              >
+                <Popup className="dasi-popup" closeButton={false} autoPan>
+                  <div className="w-64 space-y-3 rounded-2xl bg-[#FDFBF7] p-1 text-emerald-900">
+                    <div className="overflow-hidden rounded-2xl">
+                      <img
+                        src={attraction.image_url}
+                        alt={attraction.name}
+                        className="h-32 w-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                        {t.home.categories[attraction.category]}
+                      </p>
+                      <h3 className="mt-1 text-lg font-semibold">
+                        {attraction.name}
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-emerald-800/80">
+                        {attraction.description}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onSelectAttraction(attraction)}
+                      className="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] hover:bg-emerald-700"
+                    >
+                      {t.home.mapButtonLabel}
+                    </button>
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                      {t.home.categories[attraction.category]}
-                    </p>
-                    <h3 className="mt-1 text-lg font-semibold">
-                      {attraction.name}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-emerald-800/80">
-                      {attraction.description}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => onSelectAttraction(attraction)}
-                    className="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] hover:bg-emerald-700"
-                  >
-                    {t.home.mapButtonLabel}
-                  </button>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+                </Popup>
+              </Marker>
+            );
+          })}
         </MapContainer>
       </div>
     </motion.div>
