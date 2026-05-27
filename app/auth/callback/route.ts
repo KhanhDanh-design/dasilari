@@ -3,9 +3,18 @@ import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const { searchParams, host } = new URL(request.url);
+
+  // Kiểm tra xem có phải đang chạy ở môi trường local không
   const isLocalhost =
-    host.startsWith("localhost") || host.startsWith("127.0.0.1");
-  const baseUrl = isLocalhost ? "http://localhost:3000" : `https://${host}`;
+    host.startsWith("localhost") ||
+    host.startsWith("127.0.0.1") ||
+    host.startsWith("157.230.255.181");
+
+  // Nếu là local thì dùng localhost, nếu là production thì ép thẳng về tên miền chính thức của bạn
+  const baseUrl = isLocalhost
+    ? "http://localhost:3000"
+    : "https://dntkhanh.io.vn";
+
   const code = searchParams.get("code");
 
   if (code) {
@@ -23,12 +32,13 @@ export async function GET(request: Request) {
         } = await supabase.auth.getUser());
       }
 
+      // Điều hướng dựa trên email admin
       const redirectPath =
         user?.email === "2212390@dlu.edu.vn" ? "/admin" : "/";
       return NextResponse.redirect(new URL(redirectPath, baseUrl));
     }
   }
 
-  // return the user to an error page with instructions
+  // Nếu có lỗi, trả user về trang lỗi của hệ thống
   return NextResponse.redirect(`${baseUrl}/auth/auth-code-error`);
 }
