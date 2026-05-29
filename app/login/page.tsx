@@ -14,9 +14,12 @@ export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
 
+  // Định nghĩa cứng domain để tránh lỗi proxy nhận nhầm localhost
+  const PRODUCTION_URL = "https://dntkhanh.io.vn";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    loading(true);
     setError(null);
 
     try {
@@ -31,7 +34,7 @@ export default function LoginPage() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            emailRedirectTo: `${PRODUCTION_URL}/auth/callback`,
           },
         });
         if (error) throw error;
@@ -52,8 +55,8 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          // Điều hướng luồng xử lý token về đúng file callback
-          redirectTo: `${window.location.origin}/auth/callback`,
+          // Ép buộc luồng OAuth luôn trả token phản hồi về domain thật
+          redirectTo: `${PRODUCTION_URL}/auth/callback`,
         },
       });
       if (error) throw error;
@@ -124,7 +127,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Đường kẻ phân cách (Bổ sung mới) */}
+          {/* Đường kẻ phân cách */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
@@ -136,7 +139,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Nút bấm Google OAuth (Bổ sung mới) */}
+          {/* Nút bấm Google OAuth */}
           <button
             type="button"
             onClick={handleGoogleLogin}
